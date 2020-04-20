@@ -1,49 +1,71 @@
-from kivy.app import App
-from kivy.uix.floatlayout import FloatLayout
-from kivy.core.window import Window
-from kivy.uix.label import Label
+from kivy.app import App, Widget;
+from kivy.clock import Clock;
+from kivy.uix.floatlayout import FloatLayout;
+from kivy.core.window import Window;
+from kivy.uix.label import Label;
 from kivy.graphics import Color, Ellipse, Line;
+from kivy.graphics.stencil_instructions import StencilPush, StencilPop, StencilUse,StencilUnUse;
 
 Window.clearcolor = (0.9,0.9,0.9,1)
 
-class PupilVisual(App):
+
+centerX = Window.size[0]/2;
+centerY = Window.size[1]/2;
+
+class Pupil(Widget):
+    dilate = None;
+
+    def __init__(self, lightSrc, maxRadius, minRadius, *args, **kwargs):
+        Widget.__init__(self, *args, **kwargs);
+
+        self.minRadius = minRadius;
+        self.maxRadius = maxRadius;
+
+        self.dilate = Clock.schedule_interval(self.update, 0.01);
+
+    def update(self, dt):
+        r = 100;
+        with self.canvas:
+            # Black
+            Color(0, 0, 0, 1);
+            Ellipse(pos=(centerX - r, centerY - r), size=(2*r,2*r));
+
+
+class Eye(App):
 
     def build(self):
         self.root = root = FloatLayout();
-        centerX = Window.size[0]/2;
-        centerY = Window.size[1]/2;
 
-        minRadius = 300;
-        maxRadius = 500;
         print("Center X: " + str(centerX));
         print("Center Y: " + str(centerY));
 
+        lightSrc = [centerX-50, centerY+50]
+
         with root.canvas:
-            # Blue
+
+            # Black
             Color(0, 0, 1, 1);
 
-            # Pupil Center
-            r = 100;
+            # Eye
+            r = 600;
             Ellipse(pos=(centerX - r, centerY - r), size=(2*r,2*r));
 
             # Black
             Color(0, 0, 0, 1);
+            # Outer eye outline
+            Line(circle=(centerX, centerY, r), width=3);
 
-            # Pupil Center Outline
-            Line(circle=(centerX, centerY, r), width=1.5);
-
-            # Outer pupil
-            r = maxRadius;
-            Line(circle=(centerX, centerY, r), width=1.5);
+            # Show Pupil
+            Pupil(lightSrc, 500, 300);
 
             # Gold
             Color(184/255, 212/255, 5/255, 1);
 
-            # Light entering pupil
+            # Light on edge of pupil
             r = 10;
-            Ellipse(pos=(centerX-300, centerY+150), size=(2*r,2*r));
+            Ellipse(pos=(lightSrc[0], lightSrc[1]), size=(2*r,2*r));
 
         return root;
 
 
-PupilVisual().run();
+Eye().run();
