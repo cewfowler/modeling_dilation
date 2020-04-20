@@ -23,18 +23,28 @@ class Pupil(Widget):
         self.minRadius = minRadius;
         self.maxRadius = maxRadius;
         self.lightSrc = lightSrc;
+        self.r = 100;
+        self.add = 10;
 
         self.dilate = Clock.schedule_interval(self.updatePupil, 0.05);
 
     def updatePupil(self, dt):
+        #x, y = callMatlabFunc();
+        #print(str(x) + ' ' + str(y));
+        print('Updating pupil')
+        if (self.r > 200):
+            self.add = - 10;
+        elif (self.r < 100):
+            self.add = 10;
+
+        self.r = self.r + self.add;
+
+        self.canvas.clear();
         with self.canvas:
-            x, y = callMatlabFunc();
-            print(str(x) + ' ' + str(y));
-            r = 100;
 
             # Black
             Color(0, 0, 0, 1);
-            Ellipse(pos=(centerX - r, centerY - r), size=(2*r,2*r));
+            Ellipse(pos=(centerX - self.r, centerY - self.r), size=(2*self.r,2*self.r));
 
 
 class Eye(App):
