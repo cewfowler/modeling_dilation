@@ -6,6 +6,8 @@ from kivy.uix.label import Label;
 from kivy.graphics import Color, Ellipse, Line;
 from kivy.graphics.stencil_instructions import StencilPush, StencilPop, StencilUse,StencilUnUse;
 
+from util import callMatlabFunc;
+
 Window.clearcolor = (0.9,0.9,0.9,1)
 
 
@@ -22,12 +24,14 @@ class Pupil(Widget):
         self.maxRadius = maxRadius;
         self.lightSrc = lightSrc;
 
-        self.dilate = Clock.schedule_interval(self.updatePupil, 0.01);
+        self.dilate = Clock.schedule_interval(self.updatePupil, 0.05);
 
     def updatePupil(self, dt):
         with self.canvas:
+            x, y = callMatlabFunc();
+            print(str(x) + ' ' + str(y));
             r = 100;
-            
+
             # Black
             Color(0, 0, 0, 1);
             Ellipse(pos=(centerX - r, centerY - r), size=(2*r,2*r));
