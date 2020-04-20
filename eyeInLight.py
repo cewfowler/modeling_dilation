@@ -20,12 +20,14 @@ class Pupil(Widget):
 
         self.minRadius = minRadius;
         self.maxRadius = maxRadius;
+        self.lightSrc = lightSrc;
 
-        self.dilate = Clock.schedule_interval(self.update, 0.01);
+        self.dilate = Clock.schedule_interval(self.updatePupil, 0.01);
 
-    def update(self, dt):
-        r = 100;
+    def updatePupil(self, dt):
         with self.canvas:
+            r = 100;
+            
             # Black
             Color(0, 0, 0, 1);
             Ellipse(pos=(centerX - r, centerY - r), size=(2*r,2*r));
