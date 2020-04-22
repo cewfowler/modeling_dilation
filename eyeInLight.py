@@ -1,3 +1,7 @@
+import numpy as np;
+import matplotlib.pyplot as plt
+from random import random
+
 from kivy.app import App, Widget;
 from kivy.clock import Clock;
 from kivy.uix.floatlayout import FloatLayout;
@@ -6,7 +10,7 @@ from kivy.uix.label import Label;
 from kivy.graphics import Color, Ellipse, Line;
 from kivy.graphics.stencil_instructions import StencilPush, StencilPop, StencilUse,StencilUnUse;
 
-from util import callMatlabFunc;
+from util import calculateMovement, getDistance;
 
 Window.clearcolor = (0.9,0.9,0.9,1)
 
@@ -23,28 +27,37 @@ class Pupil(Widget):
         self.minRadius = minRadius;
         self.maxRadius = maxRadius;
         self.lightSrc = lightSrc;
-        self.r = 100;
-        self.add = 10;
 
-        self.dilate = Clock.schedule_interval(self.updatePupil, 0.05);
+        d = getDistance(centerX, centerY, self.lightSrc[0], self.lightSrc[1]);
+        t = np.linspace(0, 20, int(20/0.2), endpoint=False);
+
+        # Get how pupil oscillates
+        calculateMovement(1.135, 0.05, 1.135, 0.0003, 1250, 0.01, t);
+        self.r = maxRadius * calculateMovement(1, self.lightSrc[2]/maxRadius, d/maxRadius, 0.0003, 1250, 0.01, t);
+        self.counter = 0;
+
+        self.dilate = Clock.schedule_interval(self.updatePupil, 0.2);
+
+        # plot results
+        plt.plot(t, self.r)
+        plt.xlabel('time')
+        plt.ylabel('y(t)')
+        plt.show()
 
     def updatePupil(self, dt):
-        #x, y = callMatlabFunc();
-        #print(str(x) + ' ' + str(y));
-        print('Updating pupil')
-        if (self.r > 200):
-            self.add = - 10;
-        elif (self.r < 100):
-            self.add = 10;
 
-        self.r = self.r + self.add;
+        newR = self.r[self.counter] + 8 * (random()-0.6);
+
+        self.counter = self.counter + 1;
+        if (self.counter >= len(self.r)):
+            self.counter = 0;
 
         self.canvas.clear();
         with self.canvas:
 
             # Black
             Color(0, 0, 0, 1);
-            Ellipse(pos=(centerX - self.r, centerY - self.r), size=(2*self.r,2*self.r));
+            Ellipse(pos=(centerX - newR, centerY - newR), size=(2*newR,2*newR));
 
 
 class Eye(App):
@@ -52,10 +65,10 @@ class Eye(App):
     def build(self):
         self.root = root = FloatLayout();
 
-        print("Center X: " + str(centerX));
-        print("Center Y: " + str(centerY));
+        #print("Center X: " + str(centerX));
+        #print("Center Y: " + str(centerY));
 
-        lightSrc = [centerX-50, centerY+50]
+        lightSrc = [centerX-350, centerY, 16]
 
         with root.canvas:
 
@@ -72,14 +85,13 @@ class Eye(App):
             Line(circle=(centerX, centerY, r), width=3);
 
             # Show Pupil
-            Pupil(lightSrc, 500, 300);
+            Pupil(lightSrc, 350, 100);
 
             # Gold
             Color(184/255, 212/255, 5/255, 1);
 
             # Light on edge of pupil
-            r = 10;
-            Ellipse(pos=(lightSrc[0], lightSrc[1]), size=(2*r,2*r));
+            Ellipse(pos=(lightSrc[0], lightSrc[1]), size=(2*lightSrc[2],2*lightSrc[2]));
 
         return root;
 
